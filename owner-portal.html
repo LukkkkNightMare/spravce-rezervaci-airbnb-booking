@@ -948,23 +948,14 @@
                 </button>
             </div>
 
-            <p style="color:var(--text-muted); font-size:13px; margin-bottom:16px;">
+            <p style="color:var(--text-muted); font-size:13px; margin-bottom:16px;" id="statementSubtext">
                 Finanční přehled pro apartmán Konšelská s fixními parametry: <strong>1 200 Kč / úklid</strong>, <strong>100 Kč / rezervace za vydání klíčů (Večerka)</strong> a <strong>správa 20 % z příjmu</strong>.
             </p>
 
             <div style="overflow-x:auto;">
                 <table class="statement-table">
-                    <thead>
-                        <tr>
-                            <th>Termín pobytu</th>
-                            <th>Platforma</th>
-                            <th>Noci</th>
-                            <th class="text-right">Příjem na účet</th>
-                            <th class="text-right">Úklid</th>
-                            <th class="text-right">Klíče Večerka</th>
-                            <th class="text-right">Správa (20%)</th>
-                            <th class="text-right">Čistá výplata majiteli</th>
-                        </tr>
+                    <thead id="statementTableHead">
+                        <!-- Dynamic Header by JS -->
                     </thead>
                     <tbody id="statementTableBody">
                         <!-- Dynamic Statement Rows -->
@@ -1031,13 +1022,99 @@
         ];
 
         /**
-         * 📊 SKUTEČNÉ HISTORICKÉ VÝSLEDKY Z EXCEL TABULKY (Černě ohraničené řádky)
-         * Slouží pro ukazatel překročení hranice 22 000 Kč čistého zisku
+         * 📊 100% OFICIÁLNÍ SCHVÁLENÁ VYÚČTOVÁNÍ (ZASLANÉ PDF PROTOKOLY NEWAY PRO VOJTĚCHA DOLEŽALA)
+         * Data za červenec, srpen a září na haléř přesně odpovídají bankovním výpisům a zaslaným PDF!
          */
-        const HISTORICAL_SHEET_PROFITS = {
-            '2026-07': { netProfit: 9725.22, label: 'Červenec 2026', status: 'Uzavřeno' },
-            '2026-08': { netProfit: 12736.36, label: 'Srpen 2026', status: 'Uzavřeno' },
-            '2026-09': { netProfit: 15166.22, label: 'Září 2026', status: 'Uzavřeno' }
+        const OFFICIAL_STATEMENTS = {
+            '2026-07': {
+                label: 'Červenec 2026',
+                period: '1.–31. července 2026',
+                startBalance: -12000.00,
+                startBalanceNote: 'přenos dluhu z předchozího období započtený do vybavení bytu',
+                grossRevenue: 17896.52,
+                cleaningsTotal: 1500.00,
+                cleaningsNote: '1x úklid + předání klíčů (Brit)',
+                mgmtCommission: 3579.30,
+                grossResult: 9725.22,
+                finalBalance: -2274.78,
+                finalBalanceLabel: 'Zůstatek k 31. 7. 2026 (dluh majitele vůči NEWAY po započtení vybavení):',
+                payoutAmount: -2274.78,
+                note: 'Počáteční dluh na vybavení: -12 000,00 Kč • Hrubý výsledek měsíce: +9 725,22 Kč • Přenos dluhu do srpna: -2 274,78 Kč',
+                items: [
+                    { date: '20.7.–1.8.2026', title: 'Platba za pobyt – Brit', channel: 'AirBnb', type: 'income', amount: 17896.52, status: 'uhrazeno' },
+                    { date: '31.7.2026', title: 'AirBnb – servisní poplatek', channel: 'AirBnb', type: 'info', amount: 0.00, status: 'uhrazeno' },
+                    { date: '31.7.2026', title: 'Úklid + předání klíčů – Brit', channel: 'NEWAY', type: 'cost', amount: -1500.00, status: 'uhrazeno' },
+                    { date: '20.8.2026', title: 'Úhrada DPH za 07/2026 (FÚ)', channel: 'FÚ', type: 'cost', amount: -3092.00, status: 'uhrazeno' },
+                    { date: '31.7.2026', title: 'Servisní poplatek (nefunkční WiFi)', channel: 'AirBnb', type: 'info', amount: 0.00, status: 'uhrazeno' },
+                    { date: '31.7.2026', title: 'Provize NEWAY (20 % z obratu)', channel: 'NEWAY', type: 'cost', amount: -3579.30, status: 'uhrazeno' }
+                ]
+            },
+            '2026-08': {
+                label: 'Srpen 2026',
+                period: '1.–31. srpna 2026',
+                startBalance: -2275.00,
+                startBalanceNote: 'dluh přenesený z předchozího období (červenec 2026)',
+                grossRevenue: 31795.62,
+                cleaningsTotal: 9000.00,
+                cleaningsNote: '6x úklid + předání klíčů (po 1 500 Kč dle protokolu)',
+                mgmtCommission: 5095.02,
+                grossResult: 12736.36,
+                finalBalance: 10461.36,
+                finalBalanceLabel: 'Zůstatek k 31. 8. 2026 (vyplacený profit majitele bytu):',
+                payoutAmount: 10461.36,
+                note: 'Dluh z července: -2 275,00 Kč • Hrubý výsledek srpna: +12 736,36 Kč • Vyplaceno majiteli na fakturu dne 30. 9. 2026: +10 461,36 Kč',
+                items: [
+                    { date: '5.8.2026', title: 'Platba za pobyt – Natálie Konopiská', channel: 'AirBnb', type: 'income', amount: 6388.87, status: 'uhrazeno' },
+                    { date: '5.8.2026', title: 'Úklid + předání klíčů', channel: 'NEWAY', type: 'cost', amount: -1500.00, status: 'uhrazeno' },
+                    { date: '8.8.2026', title: 'Platba za pobyt – Lucian Lee', channel: 'AirBnb', type: 'income', amount: 2992.35, status: 'uhrazeno' },
+                    { date: '8.8.2026', title: 'Úklid + předání klíčů', channel: 'NEWAY', type: 'cost', amount: -1500.00, status: 'uhrazeno' },
+                    { date: '16.8.2026', title: 'Platba za pobyt – Herman Orav + Юхименко Максим', channel: 'Booking', type: 'income', amount: 6220.52, status: 'uhrazeno' },
+                    { date: '16.8.2026', title: 'Úklid + předání klíčů', channel: 'NEWAY', type: 'cost', amount: -1500.00, status: 'uhrazeno' },
+                    { date: '17.8.2026', title: 'Úklid + předání klíčů', channel: 'NEWAY', type: 'cost', amount: -1500.00, status: 'uhrazeno' },
+                    { date: '23.8.2026', title: 'Platba za pobyt – Hunor Buday', channel: 'AirBnb', type: 'income', amount: 8465.54, status: 'uhrazeno' },
+                    { date: '23.8.2026', title: 'Úklid + předání klíčů', channel: 'NEWAY', type: 'cost', amount: -1500.00, status: 'uhrazeno' },
+                    { date: '30.8.2026', title: 'Platba za pobyt – Klára Bartošová', channel: 'AirBnb', type: 'income', amount: 7628.34, status: 'uhrazeno' },
+                    { date: '30.8.2026', title: 'Úklid + předání klíčů', channel: 'NEWAY', type: 'cost', amount: -1500.00, status: 'uhrazeno' },
+                    { date: '20.9.2026', title: 'Úhrada DPH za 08/2026 (FÚ)', channel: 'FÚ', type: 'cost', amount: -2088.24, status: 'V řešení' },
+                    { date: '16.8.2026', title: 'Oprava (bílý akryl) práce + materiál', channel: 'NEWAY', type: 'cost', amount: -400.00, status: 'uhrazeno' },
+                    { date: '20.8.2026', title: 'Nákup vybavení a spotřebního materiálu (SAPA, IKEA, nápoje)', channel: 'Materiál', type: 'cost', amount: -2376.00, status: 'uhrazeno' },
+                    { date: '31.8.2026', title: 'Provize NEWAY (20 % z obratu)', channel: 'NEWAY', type: 'cost', amount: -5095.02, status: 'uhrazeno' }
+                ]
+            },
+            '2026-09': {
+                label: 'Září 2026',
+                period: '1.–30. září 2026',
+                startBalance: 0.00,
+                startBalanceNote: 'Zůstatek za srpen (10 461,36 Kč) byl řádně vyplacen majiteli dne 30. 9. 2026',
+                grossRevenue: 38744.03,
+                cleaningsTotal: 10400.00,
+                cleaningsNote: '8x úklid + předání klíčů (po 1 300 Kč dle protokolu)',
+                mgmtCommission: 7748.81,
+                grossResult: 15166.22,
+                finalBalance: 15166.22,
+                finalBalanceLabel: 'Zůstatek k 30. 9. 2026 (profit majitele bytu k vyplacení):',
+                payoutAmount: 15166.22,
+                note: 'Počáteční zůstatek: 0,00 Kč • Hrubý výsledek za září: +15 166,22 Kč • K vyplacení na bankovní účet majitele: +15 166,22 Kč',
+                items: [
+                    { date: '7.9.2026', title: 'Platba za pobyt – Khanh Mai', channel: 'AirBnb', type: 'income', amount: 6386.46, status: 'uhrazeno' },
+                    { date: '8.9.2026', title: 'Úklid + předání klíčů', channel: 'NEWAY', type: 'cost', amount: -1300.00, status: 'uhrazeno' },
+                    { date: '9.9.2026', title: 'Výměna sprchové hlavice (materiál + instalace)', channel: 'NEWAY', type: 'cost', amount: -750.00, status: 'uhrazeno' },
+                    { date: '10.9.2026', title: 'Úklid + předání klíčů', channel: 'NEWAY', type: 'cost', amount: -1300.00, status: 'uhrazeno' },
+                    { date: '13.9.2026', title: 'Úklid + předání klíčů', channel: 'NEWAY', type: 'cost', amount: -1300.00, status: 'uhrazeno' },
+                    { date: '14.9.2026', title: 'Platba za pobyt', channel: 'AirBnb', type: 'income', amount: 4056.13, status: 'uhrazeno' },
+                    { date: '15.9.2026', title: 'Úklid + předání klíčů', channel: 'NEWAY', type: 'cost', amount: -1300.00, status: 'uhrazeno' },
+                    { date: '18.9.2026', title: 'Platba za pobyt', channel: 'AirBnb', type: 'income', amount: 11815.30, status: 'uhrazeno' },
+                    { date: '22.9.2026', title: 'Úklid + předání klíčů', channel: 'NEWAY', type: 'cost', amount: -1300.00, status: 'uhrazeno' },
+                    { date: '25.9.2026', title: 'Úklid + předání klíčů', channel: 'NEWAY', type: 'cost', amount: -1300.00, status: 'uhrazeno' },
+                    { date: '26.9.2026', title: 'Doplnění zásob (detergenty, káva, vody)', channel: 'NEWAY', type: 'cost', amount: -650.00, status: 'uhrazeno' },
+                    { date: '28.9.2026', title: 'Úklid + předání klíčů', channel: 'NEWAY', type: 'cost', amount: -1300.00, status: 'uhrazeno' },
+                    { date: '28.9.2026', title: 'Zámečník – zabouchnuté dveře (výjezd + otevření)', channel: 'NEWAY', type: 'cost', amount: -2500.00, status: 'uhrazeno' },
+                    { date: '30.9.2026', title: 'Úklid + předání klíčů', channel: 'NEWAY', type: 'cost', amount: -1300.00, status: 'uhrazeno' },
+                    { date: '2.10.2026', title: 'Platba za pobyt (výplata Booking.com za zářijové pobyty)', channel: 'Booking', type: 'income', amount: 16486.14, status: 'uhrazeno' },
+                    { date: '20.10.2026', title: 'Úhrada DPH za 09/2026 (FÚ)', channel: 'FÚ', type: 'cost', amount: -1529.00, status: 'uhrazeno' },
+                    { date: '30.9.2026', title: 'Provize NEWAY (20 % z obratu)', channel: 'NEWAY', type: 'cost', amount: -7748.81, status: 'uhrazeno' }
+                ]
+            }
         };
 
         const FIXED_PARAMS = {
@@ -1239,26 +1316,14 @@
             const targetBadge = document.getElementById('targetStatusBadge');
             const targetProgress = document.getElementById('targetProgressBar');
 
-            // Zjistíme, zda jde o uzavřený měsíc (např. dnes je 20. 10. 2026, takže 07, 08, 09 jsou uzavřené)
+            const stmt = OFFICIAL_STATEMENTS[monthObj.id];
             const today = new Date();
             const currentYearMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
             const isClosedMonth = monthObj.id < currentYearMonth;
 
-            if (isClosedMonth) {
-                // Bereme oficiální zisk z černé řádky v Excelu (pokud existuje), jinak přesný propočet
-                let netProfit = 0;
-                if (HISTORICAL_SHEET_PROFITS[monthObj.id]) {
-                    netProfit = HISTORICAL_SHEET_PROFITS[monthObj.id].netProfit;
-                } else {
-                    // Spočítat z rezervací
-                    let gross = 0;
-                    monthStays.forEach(r => gross += r.price);
-                    const cleanings = monthStays.length * FIXED_PARAMS.cleaningCost;
-                    const keys = monthStays.length * FIXED_PARAMS.keysCost;
-                    const mgmt = gross * FIXED_PARAMS.mgmtCommissionRate;
-                    netProfit = gross - cleanings - keys - mgmt;
-                }
-
+            if (stmt) {
+                // Použijeme oficiální hrubý výsledek měsíce (před započtením starých dluhů na vybavení)
+                const netProfit = stmt.grossResult;
                 const pct = Math.min(100, Math.round((netProfit / targetVal) * 100));
                 const diff = targetVal - netProfit;
 
@@ -1274,10 +1339,23 @@
                     targetBadge.textContent = `${pct} % Z CÍLE`;
                     targetBadge.style.background = 'rgba(245, 158, 11, 0.2)';
                     targetBadge.style.color = '#F59E0B';
-                    targetSub.innerHTML = `Do cíle 22 000 Kč zbývá: <strong>${Math.round(diff).toLocaleString('cs-CZ')} Kč</strong> (splněno ${pct} %).`;
+                    targetSub.innerHTML = `Do cíle 22 000 Kč zbývá: <strong>${Math.round(diff).toLocaleString('cs-CZ')} Kč</strong> (dosaženo ${pct} %).`;
                 }
+            } else if (isClosedMonth) {
+                let gross = 0;
+                monthStays.forEach(r => gross += r.price);
+                const cleanings = monthStays.length * FIXED_PARAMS.cleaningCost;
+                const keys = monthStays.length * FIXED_PARAMS.keysCost;
+                const mgmt = gross * FIXED_PARAMS.mgmtCommissionRate;
+                const netProfit = gross - cleanings - keys - mgmt;
+                const pct = Math.min(100, Math.round((netProfit / targetVal) * 100));
+                const diff = targetVal - netProfit;
+
+                targetDisplay.textContent = `${Math.round(netProfit).toLocaleString('cs-CZ')} Kč`;
+                targetProgress.style.width = `${pct}%`;
+                targetBadge.textContent = `${pct} % Z CÍLE`;
+                targetSub.innerHTML = `Do cíle 22 000 Kč zbývá: <strong>${Math.round(diff).toLocaleString('cs-CZ')} Kč</strong>.`;
             } else {
-                // Budoucí nebo probíhající měsíc - podle zadání se zatím neukazuje jako finální
                 targetBadge.textContent = 'MĚSÍC PROBÍHÁ';
                 targetBadge.style.background = 'rgba(255, 255, 255, 0.08)';
                 targetBadge.style.color = 'var(--text-muted)';
@@ -1296,19 +1374,28 @@
          * 💰 3. SEKUNDÁRNÍ METRIKY
          */
         function renderSecondaryKPIs(monthObj, monthStays) {
-            let totalGross = 0;
-            monthStays.forEach(r => totalGross += r.price);
+            const stmt = OFFICIAL_STATEMENTS[monthObj.id];
 
-            const totalCleaningsCost = monthStays.length * FIXED_PARAMS.cleaningCost;
-            const totalKeysCost = monthStays.length * FIXED_PARAMS.keysCost;
-            const totalServiceCosts = totalCleaningsCost + totalKeysCost;
-            const mgmtFee = totalGross * FIXED_PARAMS.mgmtCommissionRate;
-            const netPayout = totalGross - totalServiceCosts - mgmtFee;
+            if (stmt) {
+                document.getElementById('kpiGrossRevenue').textContent = `${Math.round(stmt.grossRevenue).toLocaleString('cs-CZ')} Kč`;
+                document.getElementById('kpiNetPayout').textContent = `${Math.round(stmt.finalBalance).toLocaleString('cs-CZ')} Kč`;
+                document.getElementById('kpiCleaningsTotal').textContent = `${Math.round(stmt.cleaningsTotal).toLocaleString('cs-CZ')} Kč`;
+                document.getElementById('kpiCleaningsNote').textContent = stmt.cleaningsNote;
+            } else {
+                let totalGross = 0;
+                monthStays.forEach(r => totalGross += r.price);
 
-            document.getElementById('kpiGrossRevenue').textContent = `${Math.round(totalGross).toLocaleString('cs-CZ')} Kč`;
-            document.getElementById('kpiNetPayout').textContent = `${Math.round(netPayout).toLocaleString('cs-CZ')} Kč`;
-            document.getElementById('kpiCleaningsTotal').textContent = `${totalServiceCosts.toLocaleString('cs-CZ')} Kč`;
-            document.getElementById('kpiCleaningsNote').textContent = `${monthStays.length}x úklid (${FIXED_PARAMS.cleaningCost} Kč) + ${monthStays.length}x klíče (${FIXED_PARAMS.keysCost} Kč)`;
+                const totalCleaningsCost = monthStays.length * FIXED_PARAMS.cleaningCost;
+                const totalKeysCost = monthStays.length * FIXED_PARAMS.keysCost;
+                const totalServiceCosts = totalCleaningsCost + totalKeysCost;
+                const mgmtFee = totalGross * FIXED_PARAMS.mgmtCommissionRate;
+                const netPayout = totalGross - totalServiceCosts - mgmtFee;
+
+                document.getElementById('kpiGrossRevenue').textContent = `${Math.round(totalGross).toLocaleString('cs-CZ')} Kč`;
+                document.getElementById('kpiNetPayout').textContent = `${Math.round(netPayout).toLocaleString('cs-CZ')} Kč`;
+                document.getElementById('kpiCleaningsTotal').textContent = `${totalServiceCosts.toLocaleString('cs-CZ')} Kč`;
+                document.getElementById('kpiCleaningsNote').textContent = `${monthStays.length}x úklid (${FIXED_PARAMS.cleaningCost} Kč) + ${monthStays.length}x klíče (${FIXED_PARAMS.keysCost} Kč)`;
+            }
 
             // Dynamický nejbližší úklid z Google Kalendáře nebo rezervací
             const now = new Date();
@@ -1455,48 +1542,128 @@
          * 📑 6. TRANSPARENTNÍ VYÚČTOVÁNÍ MAJITELE
          */
         function renderStatementTable(monthObj, monthStays) {
+            const thead = document.getElementById('statementTableHead');
             const tbody = document.getElementById('statementTableBody');
+            const subtext = document.getElementById('statementSubtext');
             tbody.innerHTML = '';
 
-            let grandTotalGross = 0;
-            let grandTotalCleanings = 0;
-            let grandTotalKeys = 0;
-            let grandTotalMgmt = 0;
-            let grandTotalNet = 0;
+            const stmt = OFFICIAL_STATEMENTS[monthObj.id];
 
-            monthStays.forEach(r => {
-                const gross = r.price;
-                const cleaning = FIXED_PARAMS.cleaningCost;
-                const keys = FIXED_PARAMS.keysCost;
-                const mgmt = Math.round(gross * FIXED_PARAMS.mgmtCommissionRate);
-                const net = gross - cleaning - keys - mgmt;
+            if (stmt) {
+                // 1. OFICIÁLNÍ HISTORICKÉ VYÚČTOVÁNÍ (Dle schváleného PDF protokolu NEWAY)
+                subtext.innerHTML = `Oficiální vyúčtování vystavené <strong>NEWAY s.r.o.</strong> pro <strong>Vojtěcha Doležala</strong> za období <strong>${stmt.period}</strong>. Všechny položky a částky na haléř přesně odpovídají schválenému protokolu a bankovním převodům.`;
 
-                grandTotalGross += gross;
-                grandTotalCleanings += cleaning;
-                grandTotalKeys += keys;
-                grandTotalMgmt += mgmt;
-                grandTotalNet += net;
-
-                const isAirbnb = r.channel === 'Airbnb';
-                const badgeClass = isAirbnb ? 'badge-airbnb' : 'badge-booking';
-                const icon = isAirbnb ? 'fa-brands fa-airbnb' : 'fa-solid fa-b';
-
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td><strong>${formatCzechDate(r.checkIn)} – ${formatCzechDate(r.checkOut)}</strong></td>
-                    <td><span class="stay-badge ${badgeClass}"><i class="${icon}"></i> ${r.channel}</span></td>
-                    <td>${r.nights} nocí</td>
-                    <td class="text-right"><strong>${Math.round(gross).toLocaleString('cs-CZ')} Kč</strong></td>
-                    <td class="text-right text-rose">-${cleaning.toLocaleString('cs-CZ')} Kč</td>
-                    <td class="text-right text-rose">-${keys.toLocaleString('cs-CZ')} Kč</td>
-                    <td class="text-right text-rose">-${mgmt.toLocaleString('cs-CZ')} Kč</td>
-                    <td class="text-right text-emerald"><strong>${Math.round(net).toLocaleString('cs-CZ')} Kč</strong></td>
+                thead.innerHTML = `
+                    <tr>
+                        <th style="width: 140px;">Datum</th>
+                        <th>Položka</th>
+                        <th style="width: 120px;">Zdroj</th>
+                        <th style="width: 120px;">Status</th>
+                        <th class="text-right" style="width: 150px;">Částka</th>
+                    </tr>
                 `;
-                tbody.appendChild(tr);
-            });
 
-            document.getElementById('statementSummaryLabel').textContent = `Čistá částka k převodu na bankovní účet majitele za ${monthObj.name}:`;
-            document.getElementById('statementTotalNet').textContent = `${Math.round(grandTotalNet).toLocaleString('cs-CZ')} Kč`;
+                // Pokud byl počáteční zůstatek (přenos dluhu z minulého období)
+                if (stmt.startBalance && stmt.startBalance !== 0) {
+                    const trStart = document.createElement('tr');
+                    trStart.style.background = 'rgba(255, 255, 255, 0.02)';
+                    trStart.innerHTML = `
+                        <td><strong>Počátek</strong></td>
+                        <td><strong>Počáteční zůstatek</strong> <span style="font-size:11.5px; color:var(--text-dim);">(${stmt.startBalanceNote})</span></td>
+                        <td>NEWAY</td>
+                        <td><span style="color:#10B981; font-weight:700;"><i class="fa-solid fa-check"></i> započteno</span></td>
+                        <td class="text-right text-rose"><strong>${stmt.startBalance.toLocaleString('cs-CZ', {minimumFractionDigits: 2})} Kč</strong></td>
+                    `;
+                    tbody.appendChild(trStart);
+                }
+
+                stmt.items.forEach(item => {
+                    const tr = document.createElement('tr');
+                    const amountClass = item.amount > 0 ? 'text-emerald' : (item.amount < 0 ? 'text-rose' : 'text-dim');
+                    const sign = item.amount > 0 ? '+' : '';
+
+                    let badgeClass = 'badge-neutral';
+                    let icon = 'fa-solid fa-file-invoice';
+                    if (item.channel === 'AirBnb') { badgeClass = 'badge-airbnb'; icon = 'fa-brands fa-airbnb'; }
+                    else if (item.channel === 'Booking') { badgeClass = 'badge-booking'; icon = 'fa-solid fa-b'; }
+                    else if (item.channel === 'FÚ') { badgeClass = 'badge-neutral'; icon = 'fa-solid fa-building-columns'; }
+
+                    const statusIcon = item.status === 'uhrazeno' ? '<i class="fa-solid fa-check"></i>' : '<i class="fa-solid fa-clock"></i>';
+                    const statusColor = item.status === 'uhrazeno' ? '#10B981' : '#F59E0B';
+
+                    tr.innerHTML = `
+                        <td><strong>${item.date}</strong></td>
+                        <td>${item.title}</td>
+                        <td><span class="stay-badge ${badgeClass}"><i class="${icon}"></i> ${item.channel}</span></td>
+                        <td><span style="color:${statusColor}; font-weight:700; font-size:12px;">${statusIcon} ${item.status}</span></td>
+                        <td class="text-right ${amountClass}"><strong>${sign}${item.amount.toLocaleString('cs-CZ', {minimumFractionDigits: 2})} Kč</strong></td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+                document.getElementById('statementSummaryLabel').textContent = stmt.finalBalanceLabel;
+                document.getElementById('statementSummarySub').textContent = stmt.note;
+                document.getElementById('statementTotalNet').textContent = `${stmt.finalBalance > 0 ? '+' : ''}${stmt.finalBalance.toLocaleString('cs-CZ', {minimumFractionDigits: 2})} Kč`;
+                document.getElementById('statementTotalNet').className = `summary-total ${stmt.finalBalance >= 0 ? 'text-emerald' : 'text-rose'}`;
+            } else {
+                // 2. STANDARDNÍ BĚŽNÝ/BUDOUCÍ VÝPOČET (Říjen 2026 a dál s novými fixními parametry)
+                subtext.innerHTML = `Finanční přehled pro apartmán Konšelská s fixními parametry: <strong>1 200 Kč / úklid</strong>, <strong>100 Kč / rezervace za vydání klíčů (Večerka)</strong> a <strong>správa 20 % z příjmu</strong>.`;
+
+                thead.innerHTML = `
+                    <tr>
+                        <th>Termín pobytu</th>
+                        <th>Platforma</th>
+                        <th>Noci</th>
+                        <th class="text-right">Příjem na účet</th>
+                        <th class="text-right">Úklid</th>
+                        <th class="text-right">Klíče Večerka</th>
+                        <th class="text-right">Správa (20%)</th>
+                        <th class="text-right">Čistá výplata majiteli</th>
+                    </tr>
+                `;
+
+                let grandTotalGross = 0;
+                let grandTotalCleanings = 0;
+                let grandTotalKeys = 0;
+                let grandTotalMgmt = 0;
+                let grandTotalNet = 0;
+
+                monthStays.forEach(r => {
+                    const gross = r.price;
+                    const cleaning = FIXED_PARAMS.cleaningCost;
+                    const keys = FIXED_PARAMS.keysCost;
+                    const mgmt = Math.round(gross * FIXED_PARAMS.mgmtCommissionRate);
+                    const net = gross - cleaning - keys - mgmt;
+
+                    grandTotalGross += gross;
+                    grandTotalCleanings += cleaning;
+                    grandTotalKeys += keys;
+                    grandTotalMgmt += mgmt;
+                    grandTotalNet += net;
+
+                    const isAirbnb = r.channel === 'Airbnb';
+                    const badgeClass = isAirbnb ? 'badge-airbnb' : 'badge-booking';
+                    const icon = isAirbnb ? 'fa-brands fa-airbnb' : 'fa-solid fa-b';
+
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td><strong>${formatCzechDate(r.checkIn)} – ${formatCzechDate(r.checkOut)}</strong></td>
+                        <td><span class="stay-badge ${badgeClass}"><i class="${icon}"></i> ${r.channel}</span></td>
+                        <td>${r.nights} nocí</td>
+                        <td class="text-right"><strong>${Math.round(gross).toLocaleString('cs-CZ')} Kč</strong></td>
+                        <td class="text-right text-rose">-${cleaning.toLocaleString('cs-CZ')} Kč</td>
+                        <td class="text-right text-rose">-${keys.toLocaleString('cs-CZ')} Kč</td>
+                        <td class="text-right text-rose">-${mgmt.toLocaleString('cs-CZ')} Kč</td>
+                        <td class="text-right text-emerald"><strong>${Math.round(net).toLocaleString('cs-CZ')} Kč</strong></td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+                document.getElementById('statementSummaryLabel').textContent = `Čistá částka k převodu na bankovní účet majitele za ${monthObj.name}:`;
+                document.getElementById('statementSummarySub').textContent = `Pravidelná měsíční výplata po odečtení nákladů a provize`;
+                document.getElementById('statementTotalNet').textContent = `${Math.round(grandTotalNet).toLocaleString('cs-CZ')} Kč`;
+                document.getElementById('statementTotalNet').className = 'summary-total text-emerald';
+            }
         }
 
         /**

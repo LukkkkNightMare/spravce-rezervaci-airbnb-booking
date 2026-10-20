@@ -16,11 +16,15 @@
 
 // ==========================================
 // 📱 NASTAVENÍ TELEGRAM NOTIFIKACÍ
+// Doporučení pro bezpečnost: V Google Apps Script vložte token do 
+// Nastavení projektu -> Vlastnosti skriptu (Script Properties):
+// Název: TELEGRAM_BOT_TOKEN, Hodnota: <váš_token_z_BotFather>
 // ==========================================
 const TELEGRAM_CONFIG = {
   enabled: true,
-  botToken: "8642002052:AAE9AJU3uv9o1R-BXiji45BXPowiMFx3sDo", // @spravce_uklidu_bot
-  chatId: "712260133",                                        // Vaše Telegram Chat ID
+  // Automaticky načte ze Script Properties, případně zadejte přímo v Google Apps Script editoru
+  botToken: (typeof PropertiesService !== 'undefined' && PropertiesService.getScriptProperties().getProperty("TELEGRAM_BOT_TOKEN")) || "SEM_VLOZTE_TELEGRAM_BOT_TOKEN",
+  chatId: (typeof PropertiesService !== 'undefined' && PropertiesService.getScriptProperties().getProperty("TELEGRAM_CHAT_ID")) || "712260133",
   notifyTomorrow: true, // Posílat upozornění den předem (zítra je úklid)
   notifyToday: true     // Posílat upozornění v den úklidu (dnes je úklid)
 };
