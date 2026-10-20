@@ -1083,6 +1083,7 @@
             renderTodayStatus();
             renderMonthPills();
             renderAllForMonth(currentMonthId);
+            fetchGoogleCalendarCleanings();
         }
 
         /**
@@ -1308,6 +1309,26 @@
             document.getElementById('kpiNetPayout').textContent = `${Math.round(netPayout).toLocaleString('cs-CZ')} Kč`;
             document.getElementById('kpiCleaningsTotal').textContent = `${totalServiceCosts.toLocaleString('cs-CZ')} Kč`;
             document.getElementById('kpiCleaningsNote').textContent = `${monthStays.length}x úklid (${FIXED_PARAMS.cleaningCost} Kč) + ${monthStays.length}x klíče (${FIXED_PARAMS.keysCost} Kč)`;
+
+            // Dynamický nejbližší úklid z Google Kalendáře nebo rezervací
+            const now = new Date();
+            const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+            
+            const allCleanDates = new Set();
+            getReservations().forEach(r => allCleanDates.add(r.checkOut));
+            googleCalendarCleanings.forEach(c => allCleanDates.add(c.date));
+
+            const futureCleans = Array.from(allCleanDates)
+                .filter(d => d >= todayStr)
+                .sort();
+
+            if (futureCleans.length > 0) {
+                const nextCleanDate = futureCleans[0];
+                const dObj = new Date(nextCleanDate);
+                const daysOfWeek = ['Neděle', 'Pondělí', 'Úterý', 'Středa', 'Čtvrtek', 'Pátek', 'Sobota'];
+                const dayName = daysOfWeek[dObj.getDay()];
+                document.getElementById('kpiNextCleaning').textContent = `${dayName} ${formatCzechDate(nextCleanDate)}`;
+            }
         }
 
         /**
@@ -1354,11 +1375,12 @@
 
                 // Zkontroluj, zda v tento den končí rezervace (odjezd a úklid v 10:00 AM)
                 const checkOutStay = allReservations.find(r => r.checkOut === dateStr);
+                const isGoogleCalClean = googleCalendarCleanings.find(c => c.date === dateStr);
 
                 // Zkontroluj, zda v tento den bydlí host (noc)
                 const activeStay = allReservations.find(r => dateStr >= r.checkIn && dateStr < r.checkOut);
 
-                if (checkOutStay) {
+                if (checkOutStay || isGoogleCalClean) {
                     cell.classList.add('cleaning-day');
                     const cleanTag = document.createElement('div');
                     cleanTag.className = 'cal-tag-cleaning';
@@ -1478,20 +1500,82 @@
         }
 
         /**
-         * 🔄 AKTUALIZACE ŽIVÝCH DAT Z KALENDÁŘŮ
+         * 📅 ŽIVÉ NAČÍTÁNÍ ÚKLIDŮ PŘÍMO Z GOOGLE KALENDÁŘE
+         * Calendar ID: 4996cb62ba3e278681c44a9ae531740a34e5904330981ac6644d8197bc4b2b02@group.calendar.google.com
          */
-        function syncLiveData() {
-            const btn = document.querySelector('.btn-sync');
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Aktualizuji...';
-            
-            setTimeout(() => {
-                btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Hotovo!';
+        const GOOGLE_CALENDAR_ICAL_URL = "https://calendar.google.com/calendar/ical/4996cb62ba3e278681c44a9ae531740a34e5904330981ac6644d8197bc4b2b02%40group.calendar.google.com/public/basic.ics";
+        let googleCalendarCleanings = JSON.parse(localStorage.getItem('rvx_google_cleanings') || '[]');
+
+        async function fetchGoogleCalendarCleanings() {
+            try {
+                // Přímé stažení přes spolehlivý CORS proxy
+                const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(GOOGLE_CALENDAR_ICAL_URL)}`;
+                const res = await fetch(proxyUrl);
+                if (!res.ok) return;
+                const text = await res.text();
+                parseGoogleCalendarEvents(text);
+            } catch (err) {
+                console.warn('Google Kalendář se nepodařilo načíst živě, používám uloženou cache:', err);
+            }
+        }
+
+        function parseGoogleCalendarEvents(icsText) {
+            if (!icsText || !icsText.includes('BEGIN:VEVENT')) return;
+            const parsed = [];
+            const blocks = icsText.split('BEGIN:VEVENT');
+
+            for (let i = 1; i < blocks.length; i++) {
+                const b = blocks[i].split('END:VEVENT')[0];
+                const summaryMatch = b.match(/SUMMARY:([^\r\n]+)/i);
+                const dtstartMatch = b.match(/DTSTART(?:;VALUE=DATE)?:([0-9]{8})/i);
+                const descMatch = b.match(/DESCRIPTION:([^\r\n]+)/i);
+
+                const summary = summaryMatch ? summaryMatch[1].trim() : '';
+                const dtstart = dtstartMatch ? dtstartMatch[1].trim() : '';
+                const desc = descMatch ? descMatch[1].trim() : '';
+
+                // Hledáme úklidy pro Konšelskou
+                if (/KONŠELSKÁ|Konselska/i.test(summary) || /KONŠELSKÁ|Konselska/i.test(desc)) {
+                    if (dtstart && dtstart.length === 8) {
+                        const y = dtstart.substring(0, 4);
+                        const m = dtstart.substring(4, 6);
+                        const d = dtstart.substring(6, 8);
+                        const dateStr = `${y}-${m}-${d}`;
+
+                        if (!parsed.some(p => p.date === dateStr)) {
+                            parsed.push({
+                                date: dateStr,
+                                title: summary,
+                                source: desc.includes('Airbnb') ? 'Airbnb' : (desc.includes('Booking') ? 'Booking.com' : 'Google Kalendář')
+                            });
+                        }
+                    }
+                }
+            }
+
+            if (parsed.length > 0) {
+                googleCalendarCleanings = parsed;
+                localStorage.setItem('rvx_google_cleanings', JSON.stringify(parsed));
                 renderTodayStatus();
                 renderAllForMonth(currentMonthId);
-                setTimeout(() => {
-                    btn.innerHTML = '<i class="fa-solid fa-rotate"></i> Aktualizovat data';
-                }, 2000);
-            }, 800);
+            }
+        }
+
+        /**
+         * 🔄 AKTUALIZACE ŽIVÝCH DAT Z KALENDÁŘŮ
+         */
+        async function syncLiveData() {
+            const btn = document.querySelector('.btn-sync');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Stahuji Google Kalendář...';
+            
+            await fetchGoogleCalendarCleanings();
+
+            btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Úklidy synchronizovány!';
+            renderTodayStatus();
+            renderAllForMonth(currentMonthId);
+            setTimeout(() => {
+                btn.innerHTML = '<i class="fa-solid fa-rotate"></i> Aktualizovat data';
+            }, 2500);
         }
 
         function formatCzechDate(dateStr) {
