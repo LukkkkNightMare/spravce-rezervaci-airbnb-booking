@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reservix PMS | Správa Rezervací Apartmán Konšelská</title>
+    <meta name="description" content="Kompletní PMS a Channel Manager pro správu Airbnb, Booking.com, zpráv, ubytovací knihy a úklidů pro apartmán Konšelská (Praha 8).">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="dark-theme">
+    <div class="app-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-logo">
+                    <i class="fa-solid fa-building-user"></i>
+                </div>
+                <div class="brand-info">
+                    <span class="brand-title">Reser<strong>vix</strong></span>
+                    <span class="brand-subtitle">PMS & Channel Manager</span>
+                </div>
+            </div>
+
+            <nav class="nav-menu">
+                <button class="nav-item active" data-tab="dashboard">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <span>Přehled (Dashboard)</span>
+                </button>
+                <button class="nav-item" data-tab="calendar">
+                    <i class="fa-solid fa-calendar-days"></i>
+                    <span>Plachta & Kalendář</span>
+                </button>
+                <button class="nav-item" data-tab="inbox">
+                    <i class="fa-solid fa-comments"></i>
+                    <span>Zprávy & Auto-Chat</span>
+                    <span class="nav-badge" id="unreadMessagesCount">1</span>
+                </button>
+                <button class="nav-item" data-tab="checkin">
+                    <i class="fa-solid fa-id-card"></i>
+                    <span>Online Check-in & Kniha</span>
+                </button>
+                <button class="nav-item" data-tab="pricing">
+                    <i class="fa-solid fa-tags"></i>
+                    <span>Ceníky & Dynamika</span>
+                </button>
+                <button class="nav-item" data-tab="channels">
+                    <i class="fa-solid fa-network-wired text-accent"></i>
+                    <span>Prodejní Kanály (OTA Hub)</span>
+                    <span class="nav-badge" id="activeChannelsBadge" style="background:#10b981;">2 Aktivní</span>
+                </button>
+                <button class="nav-item" data-tab="aicalculator">
+                    <i class="fa-solid fa-wand-magic-sparkles text-accent"></i>
+                    <span>AI Výnosy & Kalkulačka</span>
+                </button>
+                <button class="nav-item" data-tab="ownerpayouts">
+                    <i class="fa-solid fa-file-invoice-dollar"></i>
+                    <span>Kauce & Výplatní Protokoly</span>
+                </button>
+                <button class="nav-item" data-tab="reservations">
+                    <i class="fa-solid fa-receipt"></i>
+                    <span>Rezervace</span>
+                </button>
+                <button class="nav-item" data-tab="housekeeping">
+                    <i class="fa-solid fa-broom"></i>
+                    <span>Úklidy & Checklisty</span>
+                </button>
+                <button class="nav-item" data-tab="analytics">
+                    <i class="fa-solid fa-chart-column"></i>
+                    <span>Tržby & Poplatky</span>
+                </button>
+                <button class="nav-item" data-tab="sync">
+                    <i class="fa-solid fa-arrows-rotate"></i>
+                    <span>iCal Synchronizace</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="active-props-indicator">
+                    <span class="prop-tag"><i class="fa-solid fa-building"></i> KONŠELSKÁ (Praha 8)</span>
+                </div>
+                <div class="sync-status">
+                    <span class="pulse-dot active"></span>
+                    <div class="sync-text">
+                        <span class="sync-label">Živá synchronizace</span>
+                        <span class="sync-time" id="lastSyncTime">Před 1 minutou</span>
+                    </div>
+                </div>
+                <button class="btn btn-emerald btn-sm w-100" onclick="syncLiveChannelAPI()">
+                    <i class="fa-solid fa-bolt"></i> 2-Way API Synch Ceníků & Payoutů
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Top Header -->
+            <header class="top-header">
+                <div class="header-search">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="globalSearchInput" placeholder="Hledat rezervaci, jméno hosta, kód zámku, pas...">
+                </div>
+
+                <div class="header-actions">
+                    <button class="btn btn-emerald" onclick="syncLiveChannelAPI()">
+                        <i class="fa-solid fa-arrows-rotate"></i> Stáhnout Rezervace Konšelská (Airbnb & Booking)
+                    </button>
+
+                    <div class="channel-badges">
+                        <span class="badge badge-airbnb"><i class="fa-brands fa-airbnb"></i> Airbnb Sync</span>
+                        <span class="badge badge-booking"><i class="fa-solid fa-b"></i> Booking.com Sync</span>
+                    </div>
+
+                    <div class="user-profile">
+                        <div class="avatar">PM</div>
+                        <div class="user-info">
+                            <span class="user-name">Petr May</span>
+                            <span class="user-role">Správce Apartmánu Konšelská</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- TAB 1: DASHBOARD -->
+            <section id="tab-dashboard" class="tab-content active">
+                <div class="hero-banner">
+                    <div class="hero-content">
+                        <span class="hero-tag"><i class="fa-solid fa-shield-halved"></i> Previo & Airbo Style PMS</span>
+                        <h1>Správce Apartmánu Konšelská (Praha 8)</h1>
+                        <p>Kompletní PMS sjednocující kalendáře Airbnb, Booking.com, automatické zprávy hostům i ubytovací knihu.</p>
+                        <div class="hero-stats-row">
+                            <div class="hero-mini-stat">
+                                <span class="h-val" id="statOccupancy">60%</span>
+                                <span class="h-lbl">Obsazenost tento měsíc</span>
+                            </div>
+                            <div class="hero-mini-stat">
+                                <span class="h-val" id="statMonthlyRev">29 254 Kč</span>
+                                <span class="h-lbl">Čisté tržby</span>
+                            </div>
+                            <div class="hero-mini-stat">
+                                <span class="h-val">50 Kč/noc</span>
+                                <span class="h-lbl">Místní poplatek Praha</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hero-image-wrapper">
+                        <img src="https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=800&q=80" alt="Apartmán Konšelská Praha" class="hero-img">
+                    </div>
+                </div>
+
+                <!-- KPI Cards -->
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-icon icon-emerald"><i class="fa-solid fa-plane-arrival"></i></div>
+                        <div class="kpi-data">
+                            <span class="kpi-title">Dnešní Check-in</span>
+                            <span class="kpi-number" id="kpiCheckInsToday">1 Host</span>
+                            <span class="kpi-sub text-emerald"><i class="fa-solid fa-check"></i> Ubytováno v pořádku</span>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-icon icon-rose"><i class="fa-solid fa-plane-departure"></i></div>
+                        <div class="kpi-data">
+                            <span class="kpi-title">Dnešní Check-out</span>
+                            <span class="kpi-number" id="kpiCheckOutsToday">1 Host</span>
+                            <span class="kpi-sub text-amber"><i class="fa-solid fa-broom"></i> Úklid Konšelská</span>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-icon icon-purple"><i class="fa-solid fa-passport"></i></div>
+                        <div class="kpi-data">
+                            <span class="kpi-title">Online Check-in</span>
+                            <span class="kpi-number" id="kpiCheckInStatus">2 / 2 Vyplněno</span>
+                            <span class="kpi-sub">Cizinecká policie PČR</span>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-icon icon-booking"><i class="fa-solid fa-comment-dots"></i></div>
+                        <div class="kpi-data">
+                            <span class="kpi-title">Auto-Zprávy Hostům</span>
+                            <span class="kpi-number">Aktivní</span>
+                            <span class="kpi-sub">Airbo style auto-responder</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dashboard Content Layout -->
+                <div class="dashboard-two-cols">
+                    <div class="dash-col main-col">
+                        <div class="glass-card">
+                            <div class="card-header-flex">
+                                <h3><i class="fa-solid fa-clock-rotate-left"></i> Nadcházející Pobyty (Apartmán Konšelská)</h3>
+                                <button class="btn btn-link" onclick="switchTab('reservations')">Seznam rezervací <i class="fa-solid fa-arrow-right"></i></button>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="custom-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Host & Kód</th>
+                                            <th>Apartmán</th>
+                                            <th>Kanál</th>
+                                            <th>Termín</th>
+                                            <th>Cena</th>
+                                            <th>Akce</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbodyUpcoming">
+                                        <!-- Dynamic rows -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dash-col side-col">
+                        <div class="glass-card">
+                            <div class="card-header-flex">
+                                <h3><i class="fa-solid fa-broom-ball"></i> Dnešní Úklidy</h3>
+                                <span class="badge badge-neutral" id="badgeHousekeepingCount">3 úkoly</span>
+                            </div>
+                            <div class="housekeeping-list" id="dashHousekeepingList">
+                                <!-- Dynamic housekeeping items -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 2: KALENDÁŘ / PLACHTA POKOJŮ (PREVIO TAPE CHART) -->
+            <section id="tab-calendar" class="tab-content">
+                <div class="section-header">
+                    <div>
+                        <h2>Plachta Pokojů & Časová Osa (Previo Style)</h2>
+                        <p class="section-desc">Přehledná mřížka vytížení pro Apartmán KONŠELSKÁ s rozlišením prodejních kanálů (Airbnb a Booking.com).</p>
+                    </div>
+                    <div class="calendar-controls">
+                        <div class="calendar-legend">
+                            <span class="leg-item leg-airbnb"><span class="dot"></span> Airbnb</span>
+                            <span class="leg-item leg-booking"><span class="dot"></span> Booking.com</span>
+                            <span class="leg-item leg-direct"><span class="dot"></span> Přímá</span>
+                        </div>
+                        <div class="btn-group">
+                            <button class="btn btn-secondary" id="calPrevMonth"><i class="fa-solid fa-chevron-left"></i></button>
+                            <span class="current-month-label" id="calMonthLabel">Září 2026</span>
+                            <button class="btn btn-secondary" id="calNextMonth"><i class="fa-solid fa-chevron-right"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card overflow-hidden">
+                    <div class="timeline-container" id="timelineContainer">
+                        <!-- Dynamic Gantt chart generated by JS -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 3: ZPRÁVY & AUTO-CHAT (AIRBO UNIFIED INBOX) -->
+            <section id="tab-inbox" class="tab-content">
+                <div class="section-header">
+                    <div>
+                        <h2>Jednotná Pošta & Automatické Zprávy (Airbo Inbox)</h2>
+                        <p class="section-desc">Všechny zprávy z Airbnb a Booking.com na jednom místě s chytrou automatizací instrukcí ke klíčům a Wi-Fi.</p>
+                    </div>
+                    <button class="btn btn-emerald" onclick="sendAutoInstructionsModal()">
+                        <i class="fa-solid fa-paper-plane"></i> Odeslat Instrukce k Příjezdu (PIN & Wi-Fi)
+                    </button>
+                </div>
+
+                <div class="inbox-layout">
+                    <!-- Conversations List -->
+                    <div class="inbox-sidebar glass-card">
+                        <div class="inbox-search">
+                            <i class="fa-solid fa-search"></i>
+                            <input type="text" placeholder="Hledat konverzaci..." id="inboxSearchInput">
+                        </div>
+                        <div class="conversations-list" id="conversationsList">
+                            <!-- Dynamic list of guest chats -->
+                        </div>
+                    </div>
+
+                    <!-- Active Chat Window -->
+                    <div class="inbox-chat-window glass-card" id="chatWindow">
+                        <div class="chat-header" id="chatHeader">
+                            <div class="chat-user-info">
+                                <h3 id="chatGuestName">Khanh Mai</h3>
+                                <span class="text-muted" id="chatGuestSub">Apartmán KONŠELSKÁ | Airbnb | Check-in: 03.09.2026</span>
+                            </div>
+                            <div class="chat-header-actions">
+                                <span class="badge badge-emerald"><i class="fa-solid fa-circle-check"></i> Ubytováno</span>
+                            </div>
+                        </div>
+
+                        <div class="chat-messages" id="chatMessages">
+                            <!-- Dynamic messages -->
+                        </div>
+
+                        <div class="chat-input-box">
+                            <div class="chat-templates-bar">
+                                <button class="btn-template" onclick="insertTemplate('checkin')"><i class="fa-solid fa-key"></i> Kód klíčů</button>
+                                <button class="btn-template" onclick="insertTemplate('wifi')"><i class="fa-solid fa-wifi"></i> Wi-Fi heslo</button>
+                                <button class="btn-template" onclick="insertTemplate('checkout')"><i class="fa-solid fa-clock"></i> Pokyny k odjezdu</button>
+                            </div>
+                            <div class="input-send-row">
+                                <input type="text" id="chatInputText" placeholder="Napište zprávu hostu...">
+                                <button class="btn btn-primary" id="btnSendChatMessage"><i class="fa-solid fa-paper-plane"></i> Odeslat</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 4: ONLINE CHECK-IN & UBYTOVACÍ KNIHA (SCANID / ALFRED STYLE) -->
+            <section id="tab-checkin" class="tab-content">
+                <div class="section-header">
+                    <div>
+                        <h2>Online Check-in & Ubytovací Kniha Hostů</h2>
+                        <p class="section-desc">Sběr osobních údajů hostů pro Cizineckou policii ČR a výpočet místního poplatku z pobytu.</p>
+                    </div>
+                    <button class="btn btn-secondary" onclick="generateGuestPortalLink()">
+                        <i class="fa-solid fa-link"></i> Kopírovat Odkaz pro Hosty (Online Registrace)
+                    </button>
+                </div>
+
+                <div class="glass-card mb-4">
+                    <div class="card-header-flex">
+                        <h3><i class="fa-solid fa-passport"></i> Registrační Kniha Hostů (Cizinecká Policie PČR)</h3>
+                        <button class="btn btn-secondary btn-sm" onclick="exportPoliceFile()"><i class="fa-solid fa-download"></i> Exportovat pro PČR (.txt)</button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="custom-table">
+                            <thead>
+                                <tr>
+                                    <th>Host</th>
+                                    <th>Číslo Dokladu (OP / Pas)</th>
+                                    <th>Státní Příslušnost</th>
+                                    <th>Datum Narození</th>
+                                    <th>Apartmán</th>
+                                    <th>Pobyt</th>
+                                    <th>Místní Poplatek</th>
+                                    <th>Stav Registrace</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyGuestBook">
+                                <!-- Dynamic Guest entries -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 5: CENÍKY & DYNAMICKÉ CENY -->
+            <section id="tab-pricing" class="tab-content">
+                <div class="section-header">
+                    <div>
+                        <h2>Ceníky & Dynamické Nastavení Cen</h2>
+                        <p class="section-desc">Úprava cen za noc, sezónní příplatky a pravidla minimální délky pobytu (Min Stay).</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="savePricingRules()">
+                        <i class="fa-solid fa-floppy-disk"></i> Uložit Ceny pro Airbnb & Booking
+                    </button>
+                </div>
+
+                <div class="properties-grid mb-4">
+                    <div class="property-card" style="max-width: 500px; margin: 0 auto;">
+                        <div class="prop-body">
+                            <h3 class="prop-title"><i class="fa-solid fa-building text-accent"></i> Apartmán KONŠELSKÁ</h3>
+                            <p class="text-muted mb-3">Konšelská 22, Praha 8 - Libeň (Kapacita: 4 osoby)</p>
+                            
+                            <div class="form-group mb-3">
+                                <label>Základní cena za noc (Kč)</label>
+                                <input type="number" id="priceKonselskaBase" value="1550" class="custom-input">
+                            </div>
+                            <div class="form-group mb-3">
+                                <label>Víkendová cena Pá–Ne (Kč)</label>
+                                <input type="number" id="priceKonselskaWeekend" value="2125" class="custom-input">
+                            </div>
+                            <div class="form-group">
+                                <label>Minimální počet nocí (Min Stay)</label>
+                                <select id="minStayKonselska" class="custom-select w-100">
+                                    <option value="1">1 noc</option>
+                                    <option value="2" selected>2 noci (Doporučeno)</option>
+                                    <option value="3">3 noci</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB: PRODEJNÍ KANÁLY (OTA HUB) -->
+            <section id="tab-channels" class="tab-content">
+                <div class="section-header">
+                    <div>
+                        <h2>Multi-Channel Prodejní Síť (OTA Hub)</h2>
+                        <p class="section-desc">Centrální distribuční uzel pro sjednocení rezervací a cen ze všech světových i českých portálů.</p>
+                    </div>
+                    <div style="display:flex; gap:10px;">
+                        <button class="btn btn-emerald" onclick="openApiCredentialsModal()">
+                            <i class="fa-solid fa-key"></i> Nastavit API Klíče (Ceny & Payouty)
+                        </button>
+                        <button class="btn btn-primary" onclick="connectNewChannelModal()">
+                            <i class="fa-solid fa-plus"></i> Připojit Nový Portál
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Visual Hub Diagram Inspired by Previo -->
+                <div class="glass-card mb-4 text-center p-5">
+                    <h3 class="mb-2"><i class="fa-solid fa-diagram-project text-accent"></i> Propojené Distribuce v Reálném Čase</h3>
+                    <p class="text-muted mb-4">Reservix automaty okamžitě aktualizují ceny a dostupnost na všech zapnutých kanálech bez rizika overbookingu.</p>
+                    
+                    <div class="ota-hub-diagram" id="otaHubDiagramContainer">
+                        <!-- Dynamic Hub Diagram Nodes -->
+                    </div>
+                </div>
+
+                <!-- Channels Settings Cards -->
+                <div class="properties-grid mb-4" id="channelsGrid">
+                    <!-- Dynamic Channel Cards -->
+                </div>
+            </section>
+
+            <!-- TAB: AI VÝNOSY & KALKULAČKA (MOJENÁJMY AI STYLE) -->
+            <section id="tab-aicalculator" class="tab-content">
+                <div class="section-header">
+                    <div>
+                        <h2>AI Kalkulačka Výnosů & Odhad Nájmu (MojeNájmy Style)</h2>
+                        <p class="section-desc">Porovnání příjmů z krátkodobého pronájmu (Airbnb/Booking) vs dlouhodobého nájmu pro apartmán Konšelská.</p>
+                    </div>
+                </div>
+
+                <div class="dashboard-two-cols mb-4">
+                    <div class="glass-card">
+                        <h3><i class="fa-solid fa-calculator text-accent"></i> Kalkulačka Výnosu Apartmánu Konšelská</h3>
+                        <div class="form-grid mb-4">
+                            <div class="form-group col-span-2">
+                                <label>Apartmán</label>
+                                <select id="calcPropSelect" class="custom-select w-100" onchange="recalculateYield()">
+                                    <option value="prop-konselska">Apartmán KONŠELSKÁ (Praha 8 - 48 m²)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Průměrná cena / noc (Kč)</label>
+                                <input type="number" id="calcPricePerNight" value="1800" class="custom-input" onchange="recalculateYield()">
+                            </div>
+                            <div class="form-group">
+                                <label>Odhadovaná obsazenost (%)</label>
+                                <input type="number" id="calcOccupancy" value="70" min="10" max="100" class="custom-input" onchange="recalculateYield()">
+                            </div>
+                        </div>
+
+                        <div class="hero-stats-row p-3" style="background:rgba(255,255,255,0.03); border-radius:12px;">
+                            <div class="hero-mini-stat">
+                                <span class="h-val text-emerald" id="calcShortTermRevenue">39 450 Kč</span>
+                                <span class="h-lbl">Čistý měsíční zisk (Krátkodobý)</span>
+                            </div>
+                            <div class="hero-mini-stat">
+                                <span class="h-val text-muted" id="calcLongTermRevenue">24 000 Kč</span>
+                                <span class="h-lbl">Tržní dlouhodobý nájem</span>
+                            </div>
+                            <div class="hero-mini-stat">
+                                <span class="h-val text-accent" id="calcProfitDiff">+64%</span>
+                                <span class="h-lbl">Vyšší výnos s Reservix PMS</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="glass-card">
+                        <h3><i class="fa-solid fa-wand-magic-sparkles text-accent"></i> AI Odhad Tržní Hodnoty</h3>
+                        <p class="text-muted mb-3">Naše AI analyzovala srovnatelné nabídky v okolí Konšelské (Praha 8 - Libeň).</p>
+                        <div class="ai-recommendation-box p-3" style="background:rgba(139, 92, 246, 0.1); border:1px solid rgba(139, 92, 246, 0.3); border-radius:12px;">
+                            <div class="text-emerald font-weight-bold mb-1"><i class="fa-solid fa-circle-check"></i> AI Doporučení pro Konšelskou:</div>
+                            <div class="text-muted" style="font-size:13px;" id="aiRecText">
+                                Pro apartmán Konšelská (Praha 8) doporučujeme nastavit min. stay na 2 noci během týdne. To ušetří náklady na úklid a navýší čistý zisk o cca 12 %.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB: KAUCE & VÝPLATNÍ PROTOKOLY (OWNER PAYOUT REPORTS) -->
+            <section id="tab-ownerpayouts" class="tab-content">
+                <div class="section-header">
+                    <div>
+                        <h2>Kauce & Výplatní Protokoly Majitelům</h2>
+                        <p class="section-desc">Vyúčtování příjmů, provizí platforem, poplatků z pobytu a správa vybraných kaucí (Security Deposits).</p>
+                    </div>
+                    <div style="display:flex; gap:10px;">
+                        <a href="owner-portal.html" target="_blank" class="btn btn-emerald">
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i> Otevřít Portál Majitele
+                        </a>
+                        <button class="btn btn-secondary" onclick="generateOwnerPDFReport()">
+                            <i class="fa-solid fa-file-pdf"></i> Generovat Výplatní Protokol (PDF)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- NEW: Klientské Portály pro Majitele (Hostinger Live) -->
+                <div class="glass-card mb-4" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.05), rgba(17, 24, 39, 0.85)); border: 1.5px solid rgba(16, 185, 129, 0.3);">
+                    <div class="card-header-flex mb-3">
+                        <div>
+                            <h3 style="color:#10B981;"><i class="fa-solid fa-house-user"></i> Online Klientská Zóna pro Majitele Bytů (Hostinger)</h3>
+                            <p class="text-muted" style="font-size:13px;">Tyto soukromé odkazy zašlete majitelům. Uvidí online na mobilu i PC obsazenost, termíny úklidů a výplatní protokol pouze svého bytu.</p>
+                        </div>
+                        <span class="badge badge-emerald"><i class="fa-solid fa-cloud-arrow-up"></i> Hostinger Ready</span>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr; gap: 16px;">
+                        <!-- Konšelská -->
+                        <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                <strong style="font-size:15px; color:#fff;"><i class="fa-solid fa-building text-accent"></i> Byt Konšelská (Praha 8)</strong>
+                                <span class="badge badge-booking">Aktivní spravovaný byt</span>
+                            </div>
+                            <div style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">
+                                Přímý odkaz pro majitele (obsazenost, 2 kalendáře, úklidy, výplata):
+                            </div>
+                            <div style="display:flex; gap:8px;">
+                                <input type="text" readonly value="https://azure-hedgehog-527851.hostingersite.com/owner-portal.html" id="linkPropKonselska" class="custom-input" style="font-size:11px; padding:6px 10px; background:rgba(0,0,0,0.3);">
+                                <button class="btn btn-secondary btn-sm" onclick="copyOwnerLink('linkPropKonselska')">
+                                    <i class="fa-solid fa-copy"></i>
+                                </button>
+                                <a href="owner-portal.html" target="_blank" class="btn btn-emerald btn-sm" style="text-decoration:none; display:flex; align-items:center;">
+                                    <i class="fa-solid fa-eye"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card mb-4">
+                    <h3><i class="fa-solid fa-vault"></i> Správa Vybraných Vratných Kauce (Security Deposits)</h3>
+                    <div class="table-responsive">
+                        <table class="custom-table">
+                            <thead>
+                                <tr>
+                                    <th>Kód Pobytu</th>
+                                    <th>Host</th>
+                                    <th>Apartmán</th>
+                                    <th>Výše Kauce</th>
+                                    <th>Stav Kontroly Bytu</th>
+                                    <th>Stav Vracení Kauce</th>
+                                    <th>Akce</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyDeposits">
+                                <tr>
+                                    <td><strong>HM8HHQZWK9</strong></td>
+                                    <td>Khanh Mai (Airbnb)</td>
+                                    <td>Apartmán KONŠELSKÁ</td>
+                                    <td><strong>3 000 Kč</strong></td>
+                                    <td><span class="badge badge-emerald">Probíhá pobyt</span></td>
+                                    <td><span class="status-pill status-checked-in">Blokováno na kartě</span></td>
+                                    <td><button class="btn btn-secondary btn-sm" onclick="showToast('Kauce 3000 Kč blokována')">Detail</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 6: REZERVACE -->
+            <section id="tab-reservations" class="tab-content">
+                <div class="section-header">
+                    <div>
+                        <h2>Přehled Stažených Rezervací (Airbnb & Booking)</h2>
+                        <p class="section-desc">Kompletní seznamek všech automaticky stažených pobytů včetně jmen hostů, cen, nocí a stavů.</p>
+                    </div>
+                    <button class="btn btn-emerald" onclick="syncLiveChannelAPI()">
+                        <i class="fa-solid fa-rotate"></i> Aktualizovat Data z Platforem
+                    </button>
+                    <div class="header-filter-bar">
+                        <select id="filterProperty" class="custom-select">
+                            <option value="ALL">Apartmán KONŠELSKÁ (Praha 8)</option>
+                        </select>
+                        <select id="filterChannel" class="custom-select">
+                            <option value="ALL">Všechny kanály</option>
+                            <option value="Airbnb">Airbnb</option>
+                            <option value="Booking">Booking.com</option>
+                            <option value="Direct">Přímá rezervace</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="glass-card">
+                    <div class="table-responsive">
+                        <table class="custom-table" id="tableAllReservations">
+                            <thead>
+                                <tr>
+                                    <th>Kód</th>
+                                    <th>Host & Kontakt</th>
+                                    <th>Apartmán</th>
+                                    <th>Kanál</th>
+                                    <th>Příjezd</th>
+                                    <th>Odjezd</th>
+                                    <th>Nocí</th>
+                                    <th>Cena Kč</th>
+                                    <th>Stav</th>
+                                    <th>Akce</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyAllReservations">
+                                <!-- Dynamic rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 7: ÚKLIDY & CHECKLISTY (HOUSEKEEPING APP) -->
+            <section id="tab-housekeeping" class="tab-content">
+                <div class="section-header">
+                    <div>
+                        <h2>Housekeeping App (Úklidy Apartmán Konšelská)</h2>
+                        <p class="section-desc">Mobilní rozpis úklidových prací po odjezdu hostů s kontrolním checklistem.</p>
+                    </div>
+                    <button class="btn btn-secondary" onclick="addNewHousekeepingTask()">
+                        <i class="fa-solid fa-plus"></i> Naplánovat Mimořádný Úklid
+                    </button>
+                </div>
+
+                <div class="glass-card mb-4">
+                    <div class="table-responsive">
+                        <table class="custom-table">
+                            <thead>
+                                <tr>
+                                    <th>Datum</th>
+                                    <th>Apartmán</th>
+                                    <th>Předchozí -> Následující host</th>
+                                    <th>Uklízečka</th>
+                                    <th>Kontrolní Checklist</th>
+                                    <th>Stav pokoje</th>
+                                    <th>Akce</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyHousekeeping">
+                                <!-- Dynamic Housekeeping rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 8: ANALYTIKA & TRŽBY -->
+            <section id="tab-analytics" class="tab-content">
+                <div class="section-header">
+                    <div>
+                        <h2>Analytika, Tržby & Místní Poplatky</h2>
+                        <p class="section-desc">Porovnání tržeb Airbnb vs Booking.com a vyúčtování ubytovacího poplatku Magistrátu HMP.</p>
+                    </div>
+                </div>
+
+                <div class="analytics-grid">
+                    <div class="glass-card col-span-2">
+                        <h3>Měsíční Tržby podle Kanálů (Kč)</h3>
+                        <div class="chart-container" id="barChartRevenue">
+                            <!-- Dynamic SVG Bar Chart -->
+                        </div>
+                    </div>
+                    <div class="glass-card">
+                        <h3>Podíl Rezervačních Kanálů</h3>
+                        <div class="donut-chart-container" id="donutChartChannels">
+                            <!-- Dynamic SVG Donut Chart -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 9: iCal SYNCHRONIZACE -->
+            <section id="tab-sync" class="tab-content">
+                <div class="section-header">
+                    <div>
+                        <h2>iCal Synchronizace Kalendářů</h2>
+                        <p class="section-desc">Propojení iCal feedů z Airbnb a Booking.com pro automatický import.</p>
+                    </div>
+                    <button class="btn btn-emerald" id="btnTestIcalSync">
+                        <i class="fa-solid fa-bolt"></i> Spustit Synchronizaci Nyní
+                    </button>
+                </div>
+
+                <div class="glass-card mb-4">
+                    <h3><i class="fa-solid fa-link"></i> Nastavení iCal Feedů Pro Apartmán Konšelská</h3>
+                    <div class="ical-feeds-list" id="icalFeedsList">
+                        <!-- Dynamic list of iCal feeds -->
+                    </div>
+                </div>
+
+                <div class="glass-card">
+                    <h3><i class="fa-solid fa-file-export"></i> Váš Master iCal Odkaz</h3>
+                    <p class="text-muted mb-3">Tento odkaz vložte do Airbnb a Booking.com pro okamžité blokování obsazených nocí.</p>
+                    <div class="export-link-box">
+                        <input type="text" readonly class="export-url-input" value="https://reservix-sync.app/ical/feed/master_export_konselska.ics" id="masterIcalInput">
+                        <button class="btn btn-secondary" onclick="copyMasterIcal()"><i class="fa-solid fa-copy"></i> Kopírovat</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- MODALS -->
+    <!-- MODAL: NOVÁ REZERVACE -->
+    <div class="modal-backdrop" id="modalReservation">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 id="modalReservationTitle">Nová Rezervace</h3>
+                <button class="modal-close" onclick="closeModal('modalReservation')">&times;</button>
+            </div>
+            <form id="formReservation">
+                <input type="hidden" id="resId">
+                <div class="form-grid">
+                    <div class="form-group col-span-2">
+                        <label>Jméno a Příjmení Hosta *</label>
+                        <input type="text" id="resGuestName" required placeholder="např. Jan Novák">
+                    </div>
+                    <div class="form-group">
+                        <label>Email Hosta</label>
+                        <input type="email" id="resGuestEmail" placeholder="jan.novak@email.cz">
+                    </div>
+                    <div class="form-group">
+                        <label>Telefon Hosta</label>
+                        <input type="tel" id="resGuestPhone" placeholder="+420 777 123 456">
+                    </div>
+                    <div class="form-group col-span-2">
+                        <label>Apartmán *</label>
+                        <select id="resProperty" required class="custom-select w-100">
+                            <option value="prop-konselska">Apartmán KONŠELSKÁ (Libeň)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Kanál *</label>
+                        <select id="resChannel" required class="custom-select w-100">
+                            <option value="Airbnb">Airbnb</option>
+                            <option value="Booking">Booking.com</option>
+                            <option value="Direct">Přímá rezervace</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Stav *</label>
+                        <select id="resStatus" required class="custom-select w-100">
+                            <option value="Confirmed">Potvrzeno</option>
+                            <option value="Checked-In">Ubytováno</option>
+                            <option value="Completed">Dokončeno</option>
+                            <option value="Cancelled">Zrušeno</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Příjezd (Check-in) *</label>
+                        <input type="date" id="resCheckIn" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Odjezd (Check-out) *</label>
+                        <input type="date" id="resCheckOut" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Počet Hostů</label>
+                        <input type="number" id="resGuestsCount" min="1" value="2">
+                    </div>
+                    <div class="form-group">
+                        <label>Celková Cena (Kč)</label>
+                        <input type="number" id="resTotalPrice" placeholder="např. 5800">
+                    </div>
+                    <div class="form-group col-span-2">
+                        <label>Poznámka ke Klíčům / Přání</label>
+                        <textarea id="resNotes" rows="2" placeholder="Příjezd po 20:00, dětská postýlka..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('modalReservation')">Zrušit</button>
+                    <button type="submit" class="btn btn-primary">Uložit Rezervaci</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: NASTAVENÍ API PŘÍSTUPŮ (AIRBNB & BOOKING.COM 2-WAY API) -->
+    <div class="modal-backdrop" id="modalApiCredentials">
+        <div class="modal-card modal-lg">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-key text-accent"></i> Nastavení 2-Way API Přístupů (Airbnb & Booking.com)</h3>
+                <button class="modal-close" onclick="closeModal('modalApiCredentials')">&times;</button>
+            </div>
+            <form id="formApiCredentials" onsubmit="saveApiCredentials(event)">
+                <div class="modal-body text-left">
+                    <p class="text-muted mb-4">Zadejte vaše API přístupové klíče získané z Extranetu Airbnb a Booking.com pro automatické stahování přesných cen a výplat (Payouts).</p>
+                    
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+                        <!-- Booking.com API Config -->
+                        <div style="background:rgba(0,102,255,0.08); border:1px solid rgba(0,102,255,0.3); border-radius:12px; padding:16px;">
+                            <h4 style="color:#60a5fa; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+                                <i class="fa-solid fa-b"></i> Booking.com Connectivity XML API
+                            </h4>
+                            <div class="form-group mb-3">
+                                <label>Hotel / Property ID *</label>
+                                <input type="text" id="apiBkgHotelId" placeholder="např. 16884885" value="16884885">
+                            </div>
+                            <div class="form-group mb-3">
+                                <label>Machine Account Username *</label>
+                                <input type="text" id="apiBkgUser" placeholder="např. xml_konselska_pms" value="xml_konselska_pms">
+                            </div>
+                            <div class="form-group">
+                                <label>Machine Account Password / API Token *</label>
+                                <input type="password" id="apiBkgPass" placeholder="••••••••••••••••" value="bkg_secret_token_2026">
+                            </div>
+                        </div>
+
+                        <!-- Airbnb API Config -->
+                        <div style="background:rgba(255,56,92,0.08); border:1px solid rgba(255,56,92,0.3); border-radius:12px; padding:16px;">
+                            <h4 style="color:#ff788e; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+                                <i class="fa-brands fa-airbnb"></i> Airbnb Software Partner REST API
+                            </h4>
+                            <div class="form-group mb-3">
+                                <label>Airbnb Client ID / Application ID *</label>
+                                <input type="text" id="apiAirbnbClientId" placeholder="např. ab_client_994812" value="ab_client_994812">
+                            </div>
+                            <div class="form-group mb-3">
+                                <label>OAuth Refresh Token / Bearer Token *</label>
+                                <input type="password" id="apiAirbnbToken" placeholder="••••••••••••••••" value="ab_bearer_token_liben">
+                            </div>
+                            <div class="form-group">
+                                <label>Listing ID Konšelská</label>
+                                <input type="text" id="apiAirbnbListings" placeholder="1728523339636013855" value="1728523339636013855">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('modalApiCredentials')">Zrušit</button>
+                    <button type="submit" class="btn btn-emerald"><i class="fa-solid fa-floppy-disk"></i> Uložit API Klíče & Testovat Spojení</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: DETAIL REZERVACE -->
+    <div class="modal-backdrop" id="modalDetail">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Detail Pobytu <span id="detailResCode" class="text-accent"></span></h3>
+                <button class="modal-close" onclick="closeModal('modalDetail')">&times;</button>
+            </div>
+            <div class="modal-body" id="modalDetailBody">
+                <!-- Dynamic Content -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" id="btnDeleteRes"><i class="fa-solid fa-trash"></i> Smazat</button>
+                <button type="button" class="btn btn-secondary" id="btnEditRes"><i class="fa-solid fa-pen"></i> Upravit</button>
+                <button type="button" class="btn btn-primary" onclick="closeModal('modalDetail')">Zavřít</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toastNotification" class="toast">
+        <i class="fa-solid fa-circle-check"></i>
+        <span id="toastMessage">Operace byla úspěšně provedena</span>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

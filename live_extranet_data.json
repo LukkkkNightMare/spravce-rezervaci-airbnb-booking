@@ -1,0 +1,173 @@
+{
+  "timestamp": "2026-09-15T15:06:52.525625",
+  "total_parsed": 22,
+  "reservations": [
+    {
+      "source": "Airbnb Live Sync",
+      "property": "Sunny Apartment with Balcony (Konšelská)",
+      "start": "20260915",
+      "end": "20260922",
+      "uid": "1418fb94e984-f961904a6280626c2329043dab28dca2@airbnb.com",
+      "desc": "//www.airbnb.com/hosting/reservations/de"
+    },
+    {
+      "source": "Airbnb Live Sync",
+      "property": "Sunny Apartment with Balcony (Konšelská)",
+      "start": "20261003",
+      "end": "20261005",
+      "uid": "1418fb94e984-003d2770b4dec480864b667ac3dcbfbf@airbnb.com",
+      "desc": "//www.airbnb.com/hosting/reservations/de"
+    },
+    {
+      "source": "Airbnb Live Sync",
+      "property": "Sunny Apartment with Balcony (Konšelská)",
+      "start": "20261024",
+      "end": "20261102",
+      "uid": "1418fb94e984-02c5ca4d14d357d2878d34d99ccd0a3b@airbnb.com",
+      "desc": "//www.airbnb.com/hosting/reservations/de"
+    },
+    {
+      "source": "Airbnb Live Sync",
+      "property": "Sunny Apartment with Balcony (Konšelská)",
+      "start": "20261230",
+      "end": "20270102",
+      "uid": "1418fb94e984-4c3dc37bfb57af8889c0b2d07c220742@airbnb.com",
+      "desc": "//www.airbnb.com/hosting/reservations/de"
+    },
+    {
+      "source": "Airbnb Live Sync",
+      "property": "Sunny Apartment with Balcony (Konšelská)",
+      "start": "20260914",
+      "end": "20260915",
+      "uid": "7f662ec65913-d089821d330a910fde9f7523fb327d91@airbnb.com",
+      "desc": ""
+    },
+    {
+      "source": "Airbnb Live Sync",
+      "property": "Sunny Apartment with Balcony (Konšelská)",
+      "start": "20260922",
+      "end": "20260924",
+      "uid": "7f662ec65913-6843c6d7c9014cc7b8593085cac22fb7@airbnb.com",
+      "desc": ""
+    },
+    {
+      "source": "Airbnb Live Sync",
+      "property": "Sunny Apartment with Balcony (Konšelská)",
+      "start": "20260925",
+      "end": "20260928",
+      "uid": "7f662ec65913-e4bc2ddfd7fb7c8f9b1d17e4273031e2@airbnb.com",
+      "desc": ""
+    },
+    {
+      "source": "Airbnb Live Sync",
+      "property": "Sunny Apartment with Balcony (Konšelská)",
+      "start": "20261001",
+      "end": "20261003",
+      "uid": "7f662ec65913-e016178c36337a2ec1a2e658f8827b48@airbnb.com",
+      "desc": ""
+    },
+    {
+      "source": "Airbnb Live Sync",
+      "property": "Sunny Apartment with Balcony (Konšelská)",
+      "start": "20261009",
+      "end": "20261011",
+      "uid": "7f662ec65913-c894114fbc6a6bec76419aa2d9ebfdb7@airbnb.com",
+      "desc": ""
+    },
+    {
+      "source": "Airbnb Live Sync",
+      "property": "Sunny Apartment with Balcony (Konšelská)",
+      "start": "20261017",
+      "end": "20261018",
+      "uid": "7f662ec65913-23ab569e4844b1a6b7d4bb04cd5f5f15@airbnb.com",
+      "desc": ""
+    },
+    {
+      "source": "Airbnb Live Sync",
+      "property": "Sunny Apartment with Balcony (Konšelská)",
+      "start": "20261203",
+      "end": "20261206",
+      "uid": "7f662ec65913-3efe4bf19de852e6d576009d86c39f65@airbnb.com",
+      "desc": ""
+    },
+    {
+      "source": "Airbnb Live Sync",
+      "property": "Sunny Apartment with Balcony (Konšelská)",
+      "start": "20261212",
+      "end": "20261213",
+      "uid": "7f662ec65913-1fa2d30b1dd63a63093727a8d4f09d78@airbnb.com",
+      "desc": ""
+    },
+    {
+      "source": "Airbnb Live Sync",
+      "property": "Sunny Apartment with Balcony (Konšelská)",
+      "start": "20270201",
+      "end": "20270916",
+      "uid": "7f662ec65913-79daaa4e13a8ab32f87ba217bf3f365a@airbnb.com",
+      "desc": ""
+    },
+    {
+      "source": "Booking.com Live Sync",
+      "property": "Sunny Apartment with Balcony (Konšelská)",
+      "start": "20260914",
+      "end": "20260915",
+      "uid": "c989a3a670856c49df42b702c23d7a44@booking.com"
+    },
+    {
+      "source": "Booking.com Live Sync",
+      "property": "Sunny Apartment with Balcony (Konšelská)",
+      "start": "20260922",
+      "end": "20260923",
+      "uid": "13b7fcc255bf1769589d0a314a7d44a8@booking.com"
+    },
+    {
+      "source": "Booking.com Live Sync",
+      "property": "Sunny Apartment with Balcony (Konšelská)",
+      "start": "20260923",
+      "end": "20260924",
+      "uid": "862a320d9616a92c921b9879ddf963ae@booking.com"
+    },
+    {
+      "source": "Booking.com Live Sync",
+      "property": "Sunny Apartment with Balcony (Konšelská)",
+      "start": "20260925",
+      "end": "20260928",
+      "uid": "2a9f1e6f6af89ebddccfa8fa9065a95f@booking.com"
+    },
+    {
+      "source": "Booking.com Live Sync",
+      "property": "Sunny Apartment with Balcony (Konšelská)",
+      "start": "20261001",
+      "end": "20261003",
+      "uid": "e93cc8ebb31c6fdfe66556a64d9e044e@booking.com"
+    },
+    {
+      "source": "Booking.com Live Sync",
+      "property": "Sunny Apartment with Balcony (Konšelská)",
+      "start": "20261009",
+      "end": "20261011",
+      "uid": "5ceeed1aaddc6a0f4c9299a2081a18db@booking.com"
+    },
+    {
+      "source": "Booking.com Live Sync",
+      "property": "Sunny Apartment with Balcony (Konšelská)",
+      "start": "20261017",
+      "end": "20261018",
+      "uid": "5a6e18ed812dee992ba9d2d71d77cd2b@booking.com"
+    },
+    {
+      "source": "Booking.com Live Sync",
+      "property": "Sunny Apartment with Balcony (Konšelská)",
+      "start": "20261203",
+      "end": "20261206",
+      "uid": "00aa4e45b81cb2efc86d32b951b5f320@booking.com"
+    },
+    {
+      "source": "Booking.com Live Sync",
+      "property": "Sunny Apartment with Balcony (Konšelská)",
+      "start": "20261212",
+      "end": "20261213",
+      "uid": "0246d0dee71e6a9b6c010a9e1359095c@booking.com"
+    }
+  ]
+}
